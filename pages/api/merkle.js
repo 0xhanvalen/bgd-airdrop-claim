@@ -9,8 +9,8 @@ export default function handler(req, res) {
     const body = JSON.parse(req.body);
     const addressToCheck = body.address;
     try {
-        
-        let leaf = keccak256(addressToCheck, 100);
+        const user = allowlist.find(element => element.address = addressToCheck);
+        let leaf = keccak256(user.address, user.amount);
         let root = tree.getRoot().toString("hex");
         let proof = tree.getProof(leaf);
         let hexProof = tree.getHexProof(leaf);
@@ -18,7 +18,7 @@ export default function handler(req, res) {
         if (!isValid) {
             throw "Invalid Address";
         }
-        res.status(200).json({proof, hexProof, isValid});
+        res.status(200).json({proof, hexProof, isValid, user});
     } catch (error) {
         res.status(500).json({error});
     }

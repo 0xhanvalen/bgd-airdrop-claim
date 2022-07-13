@@ -10,6 +10,7 @@ export default function Home() {
   const [truncAddress, setTruncAddress] = useState();
   const [isValidClaimant, setIsValidClaimant] = useState();
   const [proof, setProof] = useState();
+  const [user, setUser] = useState();
 
   async function getContract() {
     let network = await provider.getNetwork();
@@ -23,6 +24,7 @@ export default function Home() {
     const res = await (await fetch("/api/merkle", req)).json();
     setIsValidClaimant(res?.isValid);
     setProof(res?.hexProof);
+    setUser(res?.user);
   }
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function Home() {
   const claimTokens = async () => {
     toast("Attempting Claim...");
     try {
-    const tx = await contract?.write?.claimTokens(address, 200, proof);
+    const tx = await contract?.write?.claimTokens(address, user?.amount, proof);
     const receipt = await tx.wait();
     if (receipt?.status === 1) {
       // success!
