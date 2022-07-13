@@ -4,7 +4,7 @@ import { allowlist } from "../../utils/allowlist";
 import { ShardedMerkleTree } from "../../utils/shardedMerkleTree";
 
 
-const tree = ShardedMerkleTree.fromFiles('utils/airdrops/mumbai');
+const tree = ShardedMerkleTree.fromFiles('/airdrops/mumbai');
 
 export default function handler(req, res) {
     const body = JSON.parse(req.body);
