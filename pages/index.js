@@ -4,19 +4,28 @@ import { Contract } from "../utils/contract";
 import toast from "react-hot-toast";
 import {ethers} from 'ethers';
 
+
 export default function Home() {
   const { isUpdating, provider, signer, address, connectProvider, disconnect } =
     useEthers();
   const [contract, setContract] = useState();
+  const [coinContract, setCoinContract] = useState();
   const [truncAddress, setTruncAddress] = useState();
   const [isValidClaimant, setIsValidClaimant] = useState();
   const [proof, setProof] = useState();
   const [entry, setEntry] = useState();
+  const [isClaimed, setIsClaimed] = useState();
 
   async function getContract() {
     let network = await provider.getNetwork();
-    let tempContract = Contract(network.chainId, provider, signer);
+    let tempContract = Contract(network.chainId, provider, signer, false);
     setContract(tempContract);
+  }
+  
+  async function getCoinContract() {
+    let network = await provider.getNetwork();
+    let tempContract = Contract(network.chainId, provider, signer, true);
+    setCoinContract(tempContract);
   }
 
   async function checkAddress() {
@@ -32,8 +41,18 @@ export default function Home() {
   useEffect(() => {
     if (address && provider && signer) {
       getContract();
+      getCoinContract();
     }
   }, [address, provider, signer]);
+
+  const getCoinClaimed = async () => {
+    const val = await coinContract?.read?.isClaimed();
+  }
+
+  // useEffect(() => {
+  //   if (coinContract?.read) {
+  //   }
+  // },[coinContract]);
 
   useEffect(() => {
     setTruncAddress(
@@ -58,6 +77,7 @@ export default function Home() {
       if (receipt?.status === 1) {
         // success!
         toast.success("Claim success.");
+        setIsClaimed(true);
       }
     } catch (error) {
       toast.error("Claim failed.");
@@ -97,10 +117,6 @@ export default function Home() {
               backgroundColor: `white`,
               width: `fit-content`,
               padding: `1rem`,
-              position: `absolute`,
-              right: `0`,
-              top: `0`,
-              transform: `translateX(-25%) translateY(25%)`,
               zIndex: `2`,
             }}
             className={"divbutton"}
@@ -140,7 +156,7 @@ export default function Home() {
             className={"divbutton"}
             onClick={() => claimTokens()}
           >
-            Claim Tokens
+            Claim $GARDEN Tokens
           </div>
         )}
       </div>
