@@ -2,9 +2,10 @@ const { MerkleTree } = require("merkletreejs");
 const keccak256 = require("keccak256");
 import { allowlist } from "../../utils/allowlist";
 import { ShardedMerkleTree } from "../../utils/shardedMerkleTree";
+import path from 'path';
+import { promises as fs } from 'fs';
 
-
-const tree = ShardedMerkleTree.fromFiles('/airdrops/mumbai');
+const tree = ShardedMerkleTree.fromFiles(`${process.cwd()}/json/airdrops/mumbai`);
 
 export default function handler(req, res) {
     const body = JSON.parse(req.body);
