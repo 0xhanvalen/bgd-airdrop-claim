@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useEthers } from "../contexts/EthersProviderContext";
 import { Contract } from "../utils/contract";
 import toast from "react-hot-toast";
-import {ethers} from 'ethers';
-
+import { ethers } from "ethers";
+import { MATIC_ADDRESS, MUMBAI_ADDRESS, MUMBAI_COIN_ADDRESS, MATIC_COIN_ADDRESS } from "../utils/address";
 
 export default function Home() {
   const { isUpdating, provider, signer, address, connectProvider, disconnect } =
@@ -21,7 +21,7 @@ export default function Home() {
     let tempContract = Contract(network.chainId, provider, signer, false);
     setContract(tempContract);
   }
-  
+
   async function getCoinContract() {
     let network = await provider.getNetwork();
     let tempContract = Contract(network.chainId, provider, signer, true);
@@ -34,25 +34,38 @@ export default function Home() {
     const res = await (await fetch("/api/merkle", req)).json();
     setProof(res?.proof);
     setEntry(res?.entry);
-    console.log({entry: res?.entry});
+    console.log({ entry: res?.entry });
     setIsValidClaimant(res?.isValidAddress);
   }
 
   useEffect(() => {
     if (address && provider && signer) {
       getContract();
-      getCoinContract();
     }
   }, [address, provider, signer]);
 
   const getCoinClaimed = async () => {
-    const val = await coinContract?.read?.isClaimed();
-  }
+    const filter = await contract?.read?.filters.Claim(
+      address
+    );
+    console.log({ filter });
+    try {
+      const events = await contract?.read?.queryFilter(filter, 
+        27142288);
+      console.log({ events });
+    } catch (error) {
+      console.error(error);
+      if (error.code === -32603) {
+        // do nothing, this indicates there is no event
+      }
+    }
+  };
 
-  // useEffect(() => {
-  //   if (coinContract?.read) {
-  //   }
-  // },[coinContract]);
+  useEffect(() => {
+    if (contract?.read) {
+      getCoinClaimed();
+    }
+  }, [contract]);
 
   useEffect(() => {
     setTruncAddress(
@@ -68,11 +81,7 @@ export default function Home() {
     toast("Attempting Claim...");
     const amt = ethers.BigNumber.from(entry?.balance);
     try {
-      const tx = await contract?.write?.claimTokens(
-        address,
-        amt,
-        proof
-      );
+      const tx = await contract?.write?.claimTokens(address, amt, proof);
       const receipt = await tx.wait();
       if (receipt?.status === 1) {
         // success!
@@ -84,6 +93,37 @@ export default function Home() {
       console.error(error);
     }
   };
+
+  const AddCoin = async () => {
+    if (window?.ethereum) {
+      let network = await provider.getNetwork();
+      const tokenSymbol = "GRDN";
+      const tokenDecimals = 2;
+      const tokenImage = "https://bgd-airdrop-claim.vercel.app/7.png";
+      let tokenAddress;
+      if (network.chainId == "0x89") {
+        tokenAddress = MATIC_COIN_ADDRESS;
+      }
+      if (network.chainId == "0x13881") {
+        tokenAddress = MUMBAI_COIN_ADDRESS;
+      }
+      const wasAdded = await window.ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20', // Initially only supports ERC20, but eventually more!
+          options: {
+            address: tokenAddress, // The address that the token is at.
+            symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
+            decimals: tokenDecimals, // The number of decimals in the token
+            image: tokenImage, // A string url of the token logo
+          },
+        },
+      })
+      if (wasAdded) {
+        toast.success("Coin Added");
+      }
+    }
+  }
 
   return (
     <>
@@ -118,6 +158,7 @@ export default function Home() {
               width: `fit-content`,
               padding: `1rem`,
               zIndex: `2`,
+              margin: `0 auto`,
             }}
             className={"divbutton"}
             onClick={() => connectProvider()}
@@ -157,6 +198,21 @@ export default function Home() {
             onClick={() => claimTokens()}
           >
             Claim $GARDEN Tokens
+          </div>
+        )}
+        {address && (
+          <div
+            style={{
+              backgroundColor: `white`,
+              width: `fit-content`,
+              padding: `1rem`,
+              margin: `1rem auto`,
+              zIndex: `2`,
+            }}
+            className={"divbutton"}
+            onClick={() => AddCoin()}
+          >
+            Add $GARDEN to wallet
           </div>
         )}
       </div>

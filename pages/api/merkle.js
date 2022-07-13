@@ -12,7 +12,6 @@ export default function handler(req, res) {
     const body = JSON.parse(req.body);
     const addressToCheck = body.address;
     const user = allowlist.find(entry => entry.address = addressToCheck);
-    console.log({user});
     let isValidAddress = user?.address ? true : false ;
     try {
         const [entry, proof] = tree.getProof(addressToCheck);

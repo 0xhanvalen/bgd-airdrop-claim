@@ -3,6 +3,7 @@ import { ABI } from "./abi";
 import { chainByID } from "./chain";
 import { ethers } from "ethers";
 
+
 export const Contract = (chainID, provider, signer, isCoin) => {
   let contractAddress;
 
