@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useEthers } from "../contexts/EthersProviderContext";
 import { Contract } from "../utils/contract";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
+import {ethers} from 'ethers';
 
 export default function Home() {
   const { isUpdating, provider, signer, address, connectProvider, disconnect } =
@@ -10,7 +11,7 @@ export default function Home() {
   const [truncAddress, setTruncAddress] = useState();
   const [isValidClaimant, setIsValidClaimant] = useState();
   const [proof, setProof] = useState();
-  const [user, setUser] = useState();
+  const [entry, setEntry] = useState();
 
   async function getContract() {
     let network = await provider.getNetwork();
@@ -19,12 +20,13 @@ export default function Home() {
   }
 
   async function checkAddress() {
-    const stringedAddy = JSON.stringify({address});
-    const req = {method: "POST", body: stringedAddy};
+    const stringedAddy = JSON.stringify({ address });
+    const req = { method: "POST", body: stringedAddy };
     const res = await (await fetch("/api/merkle", req)).json();
-    setIsValidClaimant(res?.isValid);
-    setProof(res?.hexProof);
-    setUser(res?.user);
+    setProof(res?.proof);
+    setEntry(res?.entry);
+    console.log({entry: res?.entry});
+    setIsValidClaimant(res?.isValidAddress);
   }
 
   useEffect(() => {
@@ -45,17 +47,23 @@ export default function Home() {
 
   const claimTokens = async () => {
     toast("Attempting Claim...");
+    const amt = ethers.BigNumber.from(entry?.balance);
     try {
-    const tx = await contract?.write?.claimTokens(address, user?.amount, proof);
-    const receipt = await tx.wait();
-    if (receipt?.status === 1) {
-      // success!
-      toast.success("Claim success.");
+      const tx = await contract?.write?.claimTokens(
+        address,
+        amt,
+        proof
+      );
+      const receipt = await tx.wait();
+      if (receipt?.status === 1) {
+        // success!
+        toast.success("Claim success.");
+      }
+    } catch (error) {
+      toast.error("Claim failed.");
+      console.error(error);
     }
-  } catch (error) {
-    toast.error("Claim failed.");
-  }
-  }
+  };
 
   return (
     <>
@@ -75,7 +83,7 @@ export default function Home() {
             top: `0px`,
             transform: `translateX(50%) translateY(-50%)`,
             zIndex: `1`,
-            maxWidth: `100vw`
+            maxWidth: `100vw`,
           }}
         />
         <img
