@@ -5,7 +5,8 @@ import { ShardedMerkleTree } from "../../utils/shardedMerkleTree";
 import path from 'path';
 import { promises as fs } from 'fs';
 
-const tree = ShardedMerkleTree.fromFiles(`${process.cwd()}/json/airdrops/mumbai`);
+const dir = path.join(process.cwd(), '/json/airdrops/mumbai');
+const tree = ShardedMerkleTree.fromFiles(`${dir}`);
 
 export default function handler(req, res) {
     const body = JSON.parse(req.body);
