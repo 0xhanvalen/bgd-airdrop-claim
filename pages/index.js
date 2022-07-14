@@ -22,12 +22,6 @@ export default function Home() {
     setContract(tempContract);
   }
 
-  async function getCoinContract() {
-    let network = await provider.getNetwork();
-    let tempContract = Contract(network.chainId, provider, signer, true);
-    setCoinContract(tempContract);
-  }
-
   async function checkAddress() {
     const stringedAddy = JSON.stringify({ address });
     const req = { method: "POST", body: stringedAddy };
@@ -45,20 +39,9 @@ export default function Home() {
   }, [address, provider, signer]);
 
   const getCoinClaimed = async () => {
-    const filter = await contract?.read?.filters.Claim(
-      address
-    );
-    console.log({ filter });
-    try {
-      const events = await contract?.read?.queryFilter(filter, 
-        27142288);
-      console.log({ events });
-    } catch (error) {
-      console.error(error);
-      if (error.code === -32603) {
-        // do nothing, this indicates there is no event
-      }
-    }
+    const val = await contract?.read?.claimed(address);
+    console.log({val});
+    setIsClaimed(val);
   };
 
   useEffect(() => {
@@ -185,7 +168,7 @@ export default function Home() {
           </div>
         )}
 
-        {address && isValidClaimant && (
+        {address && isValidClaimant && !isClaimed && (
           <div
             style={{
               backgroundColor: `white`,
@@ -200,7 +183,7 @@ export default function Home() {
             Claim $GARDEN Tokens
           </div>
         )}
-        {address && (
+        {address && isClaimed && (
           <div
             style={{
               backgroundColor: `white`,

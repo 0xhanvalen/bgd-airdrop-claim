@@ -52,8 +52,8 @@ export const ABI = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "uint256", name: "index", type: "uint256" }],
-    name: "isClaimed",
+    inputs: [{ internalType: "address", name: "", type: "address" }],
+    name: "claimed",
     outputs: [{ internalType: "bool", name: "", type: "bool" }],
     stateMutability: "view",
     type: "function",
