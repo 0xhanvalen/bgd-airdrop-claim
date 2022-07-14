@@ -138,10 +138,37 @@ export default function Home() {
           method: "wallet_switchEthereumChain",
           params: [{ chainId: maticId }],
         });
-        alert("Please Refresh Page");
+        alert("Please refresh this page and reconnect wallet.");
       } catch (error) {
         toast.error("Couldn't switch.");
         console.error(error);
+      }
+    }
+  };
+
+  const AddMatic = async () => {
+    if (window?.ethereum && provider) {
+      try {
+        toast("Adding Polygon");
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [
+            {
+              chainId: "0x89",
+              chainName: "Polygon Mainnet",
+              rpcUrls: ["https://polygon-rpc.com"],
+              blockExplorerUrls: ["https://polygonscan.com/"],
+              nativeCurrency: {
+                symbol: "MATIC",
+                decimals: 18,
+              },
+            },
+          ],
+        });
+        toast.success("Chain Added");
+        alert("Please refresh this page and reconnect wallet.");
+      } catch (addError) {
+        console.error(addError);
       }
     }
   };
@@ -246,11 +273,26 @@ export default function Home() {
               zIndex: `2`,
             }}
             className={"divbutton"}
+            onClick={() => AddMatic()}
+          >
+            Add/Switch To Polygon
+          </div>
+        )}
+        {/* {address && !isMatic && (
+          <div
+            style={{
+              backgroundColor: `white`,
+              width: `fit-content`,
+              padding: `1rem`,
+              margin: `1rem auto`,
+              zIndex: `2`,
+            }}
+            className={"divbutton"}
             onClick={() => SwitchToMatic()}
           >
             Switch to Polygon
           </div>
-        )}
+        )} */}
       </div>
     </>
   );
