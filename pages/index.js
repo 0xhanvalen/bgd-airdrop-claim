@@ -278,6 +278,22 @@ export default function Home() {
             Add/Switch To Polygon
           </div>
         )}
+        {address && isClaimed && (
+          <a href="https://snapshot.org/#/biggreendao.eth/proposal/0x23c33a394ba84ab8f3dbb9891ab6b683b516c776f0685a2c119191a65735b3bc" target="_blank" rel="noreferrer">
+          <div
+            style={{
+              backgroundColor: `white`,
+              width: `fit-content`,
+              padding: `1rem`,
+              margin: `1rem auto`,
+              zIndex: `2`,
+            }}
+            className={"divbutton"}
+            onClick={() => AddMatic()}
+          >
+            Complete Your Roll Call Vote Now!
+          </div></a>
+        )}
         {/* {address && !isMatic && (
           <div
             style={{
