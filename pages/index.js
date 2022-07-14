@@ -3,7 +3,12 @@ import { useEthers } from "../contexts/EthersProviderContext";
 import { Contract } from "../utils/contract";
 import toast from "react-hot-toast";
 import { ethers } from "ethers";
-import { MATIC_ADDRESS, MUMBAI_ADDRESS, MUMBAI_COIN_ADDRESS, MATIC_COIN_ADDRESS } from "../utils/address";
+import {
+  MATIC_ADDRESS,
+  MUMBAI_ADDRESS,
+  MUMBAI_COIN_ADDRESS,
+  MATIC_COIN_ADDRESS,
+} from "../utils/address";
 
 export default function Home() {
   const { isUpdating, provider, signer, address, connectProvider, disconnect } =
@@ -15,6 +20,7 @@ export default function Home() {
   const [proof, setProof] = useState();
   const [entry, setEntry] = useState();
   const [isClaimed, setIsClaimed] = useState();
+  const [isMatic, setIsMatic] = useState(true);
 
   async function getContract() {
     let network = await provider.getNetwork();
@@ -40,7 +46,6 @@ export default function Home() {
 
   const getCoinClaimed = async () => {
     const val = await contract?.read?.claimed(address);
-    console.log({val});
     setIsClaimed(val);
   };
 
@@ -58,6 +63,7 @@ export default function Home() {
       )}`
     );
     checkAddress();
+    CheckMaticNetwork();
   }, [address]);
 
   const claimTokens = async () => {
@@ -91,9 +97,9 @@ export default function Home() {
         tokenAddress = MUMBAI_COIN_ADDRESS;
       }
       const wasAdded = await window.ethereum.request({
-        method: 'wallet_watchAsset',
+        method: "wallet_watchAsset",
         params: {
-          type: 'ERC20', // Initially only supports ERC20, but eventually more!
+          type: "ERC20", // Initially only supports ERC20, but eventually more!
           options: {
             address: tokenAddress, // The address that the token is at.
             symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
@@ -101,12 +107,44 @@ export default function Home() {
             image: tokenImage, // A string url of the token logo
           },
         },
-      })
+      });
       if (wasAdded) {
         toast.success("Coin Added");
       }
     }
-  }
+  };
+
+  const CheckMaticNetwork = async () => {
+    if (window?.ethereum && provider) {
+      let network = await provider.getNetwork();
+      let chainId = network.chainId;
+      console.log(chainId);
+      let maticId = 137;
+      if (chainId === maticId) {
+        setIsMatic(true);
+      } else {
+        setIsMatic(false);
+      }
+    }
+  };
+
+  const SwitchToMatic = async () => {
+    if (window?.ethereum) {
+      let network = await provider.getNetwork();
+      let chainId = network.chainId;
+      let maticId = "0x89";
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: maticId }],
+        });
+        alert("Please Refresh Page");
+      } catch (error) {
+        toast.error("Couldn't switch.");
+        console.error(error);
+      }
+    }
+  };
 
   return (
     <>
@@ -180,7 +218,7 @@ export default function Home() {
             className={"divbutton"}
             onClick={() => claimTokens()}
           >
-            Claim $GARDEN Tokens
+            Claim $GARDEN Token
           </div>
         )}
         {address && isClaimed && (
@@ -196,6 +234,21 @@ export default function Home() {
             onClick={() => AddCoin()}
           >
             Add $GARDEN to wallet
+          </div>
+        )}
+        {address && !isMatic && (
+          <div
+            style={{
+              backgroundColor: `white`,
+              width: `fit-content`,
+              padding: `1rem`,
+              margin: `1rem auto`,
+              zIndex: `2`,
+            }}
+            className={"divbutton"}
+            onClick={() => SwitchToMatic()}
+          >
+            Switch to Polygon
           </div>
         )}
       </div>
