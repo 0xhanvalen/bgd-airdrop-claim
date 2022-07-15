@@ -278,7 +278,7 @@ export default function Home() {
             Add/Switch To Polygon
           </div>
         )}
-        {address && isClaimed && (
+        {/* {address && isClaimed && (
           <a href="https://snapshot.org/#/biggreendao.eth/proposal/0x23c33a394ba84ab8f3dbb9891ab6b683b516c776f0685a2c119191a65735b3bc" target="_blank" rel="noreferrer">
           <div
             style={{
@@ -293,7 +293,7 @@ export default function Home() {
           >
             Complete Your Roll Call Vote Now!
           </div></a>
-        )}
+        )} */}
         {/* {address && !isMatic && (
           <div
             style={{
