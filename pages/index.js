@@ -293,7 +293,7 @@ export default function Home() {
           >
             Complete Your Roll Call Vote Now!
           </div></a>
-        )} */}
+        )} // */}
         {/* {address && !isMatic && (
           <div
             style={{
